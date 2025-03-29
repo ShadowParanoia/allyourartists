@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AllYourArtists</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1 id="header">AllYourArtists</h1>
+            <button id="toggleFormButton"><i class="fas fa-plus"></i> Add Artist</button>
+        </header>
+        
+        <div id="formContainer">
+            <div class="form-header">
+                <h2>Add New Artist</h2>
+            </div>
+            <div class="form-preview-layout">
+                <div class="form-columns-container">
+                    <div class="form-left-column">
+                        <form id="artistForm">
+                            <div class="form-group">
+                                <label for="artistName">Artist Name</label>
+                                <input type="text" id="artistName" placeholder="Enter artist name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="artistImage">Image URL</label>
+                                <input type="url" id="artistImage" placeholder="Enter image URL" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="artistURL">Artist Page URL</label>
+                                <input type="url" id="artistURL" placeholder="Enter artist page URL" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="artistGenre">Genre</label>
+                                <input type="text" id="artistGenre" placeholder="Enter genre" required>
+                            </div>
+                        </div>
+                        <div class="form-right-column">
+                            <div class="form-group">
+                                <label for="artistVibes">Vibes</label>
+                                <input type="text" id="artistVibes" placeholder="Enter vibes" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="artistComment">Comment</label>
+                                <textarea id="artistComment" placeholder="Enter your comments" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="artistPreview">Spotify Preview URL</label>
+                                <input type="url" id="artistPreview" placeholder="Enter Spotify URL" required>
+                            </div>
+                            <button type="submit"><i class="fas fa-plus"></i> Add to Collection</button>
+                        </div>
+                    </form>
+                </div>
+                <div id="artistPreviewCard" class="artistCard">
+                    <div class="img-container">
+                        <img id="previewImage" src="https://placehold.co/300x300?text=Preview+Image" alt="Preview">
+                    </div>
+                    <div class="artistCard-content">
+                        <h2 id="previewName">Artist Name</h2>
+                        <div class="artistCard-meta">
+                            <span id="previewGenre" class="artistCard-tag">Genre</span>
+                            <span id="previewVibes" class="artistCard-tag">Vibes</span>
+                        </div>
+                        <p id="previewComment" class="comment">Your comments will appear here...</p>
+                    </div>
+                    <div class="spotify-preview-placeholder">
+                        <i class="fas fa-music"></i> Spotify Preview
+                    </div>
+                    <div class="actions">
+                        <button disabled><i class="fas fa-edit"></i></button>
+                        <button disabled><i class="fas fa-trash-alt"></i></button>
+                        <button disabled><i class="fas fa-external-link-alt"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="artistCollection"></div>
+    </div>
+    
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span id="closeModalButton" class="close">&times;</span>
+            <h2>Edit Artist</h2>
+            <form id="editArtistForm">
+                <div class="form-group">
+                    <input type="text" id="editArtistName" placeholder="Artist Name" required>
+                </div>
+                <div class="form-group">
+                    <input type="url" id="editArtistImage" placeholder="Image URL" required>
+                </div>
+                <div class="form-group">
+                    <input type="url" id="editArtistURL" placeholder="Artist Page URL" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="text" id="editArtistGenre" placeholder="Genre" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="editArtistVibes" placeholder="Vibes" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <textarea id="editArtistComment" placeholder="Comment" required></textarea>
+                </div>
+                <div class="form-group">
+                    <input type="url" id="editArtistPreview" placeholder="Spotify Preview URL" required>
+                </div>
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="splashModal" class="modal">
+        <div class="modal-content">
+            <h2>Welcome to AllYourArtists!</h2>
+            <p>Create your personal collection of favorite music artists</p>
+            <ul>
+                <li><i class="fas fa-plus"></i> Add new artists with their details and images</li>
+                <li><i class="fas fa-music"></i> Include Spotify previews to sample their music</li>
+                <li><i class="fas fa-external-link-alt"></i> Quick access to artist pages</li>
+                <li><i class="fas fa-edit"></i> Edit or delete artists from your collection anytime</li>
+            </ul>
+            <button id="closeSplashButton">Get Started</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,577 @@
+/* Modern UI Overhaul for AllYourArtists */
+:root {
+  --primary-color: #1db954; /* Spotify green */
+  --primary-hover: #1ed760;
+  --secondary-color: #191414; /* Spotify black */
+  --background-dark: #121212;
+  --card-bg: #181818;
+  --text-color: #ffffff;
+  --text-secondary: #b3b3b3;
+  --spacing-xs: 8px;
+  --spacing-sm: 16px;
+  --spacing-md: 24px;
+  --spacing-lg: 32px;
+  --border-radius: 8px;
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-heavy: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --transition-speed: 0.3s;
+}
+
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--background-dark);
+  color: var(--text-color);
+  font-family: 'Roboto', sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  padding: var(--spacing-md);
+  background-image: linear-gradient(to bottom right, rgba(30, 215, 96, 0.05), rgba(25, 20, 20, 0.9));
+  background-attachment: fixed;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: var(--secondary-color);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-medium);
+}
+
+/* Header Styles */
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-lg);
+  background: linear-gradient(to right, var(--primary-color), #1ed760);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+}
+
+/* Toggle Button */
+#toggleFormButton {
+  position: relative;
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  border: none;
+  border-radius: 50px;
+  padding: 12px 24px;
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  cursor: pointer;
+  transition: background-color var(--transition-speed), transform var(--transition-speed);
+  box-shadow: var(--shadow-light);
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#toggleFormButton:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+#toggleFormButton:active {
+  transform: translateY(0);
+}
+
+/* Form and Preview Layout */
+.form-preview-layout {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  background-color: var(--card-bg);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+}
+
+/* Form Columns Layout */
+.form-columns-container {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.form-left-column,
+.form-right-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+/* Form Styles */
+form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+#formContainer {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Submit button styling */
+.form-right-column button[type="submit"] {
+  margin-top: auto;
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  border: none;
+  border-radius: 50px;
+  padding: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-speed), transform var(--transition-speed);
+  box-shadow: var(--shadow-light);
+}
+
+.form-right-column button[type="submit"]:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+/* Compact form elements */
+.form-group {
+  margin-bottom: 6px;
+}
+
+/* Input styles */
+input, textarea {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius);
+  padding: 10px 12px;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  transition: background-color var(--transition-speed), border-color var(--transition-speed);
+  width: 100%;
+}
+
+input:focus, textarea:focus {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-secondary);
+}
+
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* Label styling */
+label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 3px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+form button[type="submit"] {
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  border: none;
+  border-radius: 50px;
+  padding: 12px;
+  font-weight: 600;
+  margin-top: var(--spacing-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-speed), transform var(--transition-speed);
+}
+
+form button[type="submit"]:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+}
+
+/* Artist Collection Grid */
+#artistCollection {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-md);
+  justify-content: center;
+}
+
+/* Artist Card Styles */
+.artistCard {
+  position: relative;
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+  transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+}
+
+.artistCard:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-heavy);
+}
+
+.artistCard img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  transition: filter var(--transition-speed);
+}
+
+.artistCard:hover img {
+  filter: brightness(1.1);
+}
+
+.artistCard-content {
+  padding: var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.artistCard h2 {
+  margin: 0 0 var(--spacing-xs);
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.artistCard-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+}
+
+.artistCard-tag {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.artistCard p.genre,
+.artistCard p.vibes {
+  margin: 0 0 var(--spacing-xs);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.artistCard .comment {
+  margin-top: auto;
+  font-style: italic;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.artistCard .spotify-player {
+  width: 100%;
+  height: 80px;
+  margin-top: auto;
+  display: none;
+  border: none;
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
+
+/* Preview Card Specific Styles */
+#artistPreviewCard {
+  width: 100%;
+  margin: 0;
+  box-shadow: var(--shadow-medium);
+}
+
+.spotify-preview-placeholder {
+  width: 100%;
+  height: 80px;
+  background-color: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
+
+.spotify-preview-placeholder i {
+  margin-right: 8px;
+  color: var(--primary-color);
+}
+
+.artistCard .actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  justify-content: flex-end;
+  padding: var(--spacing-xs);
+  margin-top: auto;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.artistCard .actions button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all var(--transition-speed);
+}
+
+.artistCard .actions button:hover {
+  color: var(--text-color);
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 10;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background-color: var(--secondary-color);
+  margin: 10% auto;
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-heavy);
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.close {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  color: var(--text-secondary);
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color var(--transition-speed);
+}
+
+.close:hover {
+  color: var(--primary-color);
+}
+
+/* Splash Modal */
+#splashModal .modal-content {
+  text-align: center;
+  max-width: 600px;
+}
+
+#splashModal h2 {
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-md);
+  font-size: 2rem;
+}
+
+#splashModal p {
+  margin-bottom: var(--spacing-md);
+  line-height: 1.6;
+}
+
+#splashModal ul {
+  text-align: left;
+  margin-bottom: var(--spacing-md);
+  list-style-position: inside;
+}
+
+#splashModal li {
+  margin-bottom: var(--spacing-xs);
+  line-height: 1.5;
+}
+
+#closeSplashButton {
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  border: none;
+  border-radius: 50px;
+  padding: 12px 24px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-speed), transform var(--transition-speed);
+}
+
+#closeSplashButton:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+}
+
+/* Search Input */
+.search-input {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto var(--spacing-md);
+  padding: 12px 16px 12px 40px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  color: var(--text-color);
+  font-size: 1rem;
+  display: block;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23b3b3b3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 12px center;
+  background-size: 16px;
+  transition: all var(--transition-speed);
+}
+
+.search-input:focus {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.2);
+}
+
+/* App Header */
+.app-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+/* Form Styling Additions */
+.form-header {
+  margin-bottom: var(--spacing-md);
+  text-align: center;
+}
+
+.form-header h2 {
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-xs);
+}
+
+.form-row {
+  display: flex;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.artistCard {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 968px) {
+  .form-columns-container {
+    flex-direction: column;
+  }
+  
+  .form-right-column button[type="submit"] {
+    margin-top: var(--spacing-sm);
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-sm);
+  }
+  
+  #artistCollection {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--spacing-sm);
+  }
+  
+  .modal-content {
+    width: 95%;
+    margin: 5% auto;
+    padding: var(--spacing-md);
+  }
+  
+  .form-row {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .form-preview-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  #artistPreviewCard {
+    order: -1;
+    margin-bottom: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  #artistCollection {
+    grid-template-columns: 1fr;
+  }
+  
+  h1 {
+    font-size: 1.8rem;
+  }
+  
+  .artistCard {
+    min-height: 400px;
+  }
+  
+  #toggleFormButton {
+    width: 100%;
+  }
+}
