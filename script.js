@@ -2,6 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     loadArtistsFromLocalStorage();
     document.getElementById('splashModal').style.display = 'block'; // Show splash screen on load
     setupEventListeners();
+    
+    // Initialize draft functionality if form is visible
+    if (document.getElementById('formContainer').style.display !== 'none') {
+        initializeDraftFunctionality();
+    }
 });
 
 // Setup all event listeners
@@ -58,6 +63,9 @@ function handleAddArtist(event) {
     addArtistToCollection(artist);
     saveArtistToLocalStorage(artist);
 
+    // Clear draft on successful submission
+    clearDraftOnSubmit();
+
     // Show a success message
     showNotification(`${artistName} added to your collection!`);
     
@@ -112,21 +120,7 @@ function showNotification(message) {
 
 // Toggle the add artist form
 function toggleForm() {
-    const formContainer = document.getElementById('formContainer');
-    const header = document.getElementById('header');
-    const toggleButton = document.getElementById('toggleFormButton');
-    
-    if (formContainer.style.display === 'none' || !formContainer.style.display) {
-        formContainer.style.display = 'block';
-        header.style.display = 'none';
-        toggleButton.innerHTML = '<i class="fas fa-times"></i> Cancel';
-        // Reset the preview to default state
-        resetPreview();
-    } else {
-        formContainer.style.display = 'none';
-        header.style.display = 'block';
-        toggleButton.innerHTML = '<i class="fas fa-plus"></i> Add Artist';
-    }
+    toggleFormWithDraft();
 }
 
 // Setup live preview handlers for the add artist form
@@ -264,7 +258,7 @@ function addArtistToCollection(artist) {
     const editButton = document.createElement('button');
     editButton.innerHTML = '<i class="fas fa-edit"></i>';
     editButton.title = 'Edit artist';
-    editButton.addEventListener('click', () => openEditModal(artist.id));
+    editButton.addEventListener('click', () => openEditModalWithDraft(artist.id));
     actionsDiv.appendChild(editButton);
 
     // Add delete button
@@ -399,6 +393,7 @@ function openEditModal(id) {
 
 // Close edit modal
 function closeEditModal() {
+    draftState.isEditing = false;
     document.getElementById('editModal').style.display = 'none';
 }
 
@@ -491,4 +486,315 @@ function setupSearch() {
             }
         });
     });
+}
+
+// ========== DRAFT FUNCTIONALITY ==========
+
+// Draft management state
+let draftState = {
+    isEditing: false,
+    isDraftModalShowing: false,
+    draftCheckTimer: null,
+    lastDraftUpdate: null,
+    autoSaveTimer: null
+};
+
+// Initialize draft functionality
+function initializeDraftFunctionality() {
+    setupDraftEventListeners();
+    
+    // Check for existing draft after a delay when form opens
+    setTimeout(() => {
+        if (!draftState.isEditing && !draftState.isDraftModalShowing) {
+            checkForExistingDraft();
+        }
+    }, 1000);
+}
+
+// Setup event listeners for draft functionality
+function setupDraftEventListeners() {
+    // Modal close buttons
+    document.getElementById('closeDraftModalButton').addEventListener('click', closeDraftModal);
+    document.getElementById('cancelDraftButton').addEventListener('click', closeDraftModal);
+    
+    // Draft action buttons
+    document.getElementById('recoverDraftButton').addEventListener('click', recoverDraft);
+    document.getElementById('discardDraftButton').addEventListener('click', discardDraft);
+    document.getElementById('manualDraftRecoveryButton').addEventListener('click', manualDraftRecovery);
+    
+    // Form input listeners for auto-save
+    const formInputs = [
+        'artistName', 'artistImage', 'artistURL', 
+        'artistGenre', 'artistVibes', 'artistComment', 'artistPreview'
+    ];
+    
+    formInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.addEventListener('input', debounceAutoSave);
+        }
+    });
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', (event) => {
+        if (event.target.id === 'draftRecoveryModal') {
+            closeDraftModal();
+        }
+    });
+}
+
+// Debounced auto-save function
+function debounceAutoSave() {
+    if (draftState.isDraftModalShowing || draftState.isEditing) {
+        return;
+    }
+    
+    clearTimeout(draftState.autoSaveTimer);
+    draftState.autoSaveTimer = setTimeout(() => {
+        updateDraftIfMeaningful();
+    }, 2000); // 2 second delay for auto-save
+}
+
+// Update draft only if content is meaningful
+function updateDraftIfMeaningful() {
+    const formData = getCurrentFormData();
+    
+    // Check if content meets minimum requirements
+    const hasMeaningfulContent = (
+        (formData.name && formData.name.length >= 2) ||
+        (formData.genre && formData.genre.length >= 2) ||
+        (formData.comment && formData.comment.length >= 10)
+    );
+    
+    if (hasMeaningfulContent) {
+        saveDraft(formData);
+        draftState.lastDraftUpdate = Date.now();
+        updateManualRecoveryButton();
+    }
+}
+
+// Get current form data
+function getCurrentFormData() {
+    return {
+        name: document.getElementById('artistName').value.trim(),
+        image: document.getElementById('artistImage').value.trim(),
+        url: document.getElementById('artistURL').value.trim(),
+        genre: document.getElementById('artistGenre').value.trim(),
+        vibes: document.getElementById('artistVibes').value.trim(),
+        comment: document.getElementById('artistComment').value.trim(),
+        preview: document.getElementById('artistPreview').value.trim(),
+        timestamp: Date.now()
+    };
+}
+
+// Save draft to localStorage
+function saveDraft(formData) {
+    try {
+        localStorage.setItem('artistFormDraft', JSON.stringify(formData));
+    } catch (error) {
+        console.warn('Could not save draft:', error);
+    }
+}
+
+// Get draft from localStorage
+function getDraft() {
+    try {
+        const draft = localStorage.getItem('artistFormDraft');
+        return draft ? JSON.parse(draft) : null;
+    } catch (error) {
+        console.warn('Could not load draft:', error);
+        return null;
+    }
+}
+
+// Check for existing draft with validation
+function checkForExistingDraft() {
+    const draft = getDraft();
+    
+    if (!draft) {
+        return;
+    }
+    
+    // Validate draft has substantial content
+    const hasSubstantialContent = (
+        (draft.name && draft.name.length >= 2) ||
+        (draft.genre && draft.genre.length >= 2) ||
+        (draft.comment && draft.comment.length >= 10)
+    );
+    
+    if (hasSubstantialContent && !isFormEmpty()) {
+        // Only show modal if there's a draft AND current form has content
+        return;
+    }
+    
+    if (hasSubstantialContent && isFormEmpty()) {
+        showDraftRecoveryModal(draft);
+    }
+}
+
+// Check if form is empty
+function isFormEmpty() {
+    const formData = getCurrentFormData();
+    return !formData.name && !formData.genre && !formData.comment && 
+           !formData.image && !formData.url && !formData.vibes && !formData.preview;
+}
+
+// Show draft recovery modal
+function showDraftRecoveryModal(draft) {
+    draftState.isDraftModalShowing = true;
+    populateDraftPreview(draft);
+    document.getElementById('draftRecoveryModal').style.display = 'block';
+}
+
+// Populate draft preview in modal
+function populateDraftPreview(draft) {
+    const contentsList = document.getElementById('draftContents');
+    contentsList.innerHTML = '';
+    
+    const fields = [
+        { key: 'name', label: 'Artist Name' },
+        { key: 'genre', label: 'Genre' },
+        { key: 'vibes', label: 'Vibes' },
+        { key: 'comment', label: 'Comment' },
+        { key: 'image', label: 'Image URL' },
+        { key: 'url', label: 'Artist URL' },
+        { key: 'preview', label: 'Spotify Preview' }
+    ];
+    
+    fields.forEach(field => {
+        if (draft[field.key] && draft[field.key].trim()) {
+            const li = document.createElement('li');
+            const value = draft[field.key].length > 50 
+                ? draft[field.key].substring(0, 50) + '...' 
+                : draft[field.key];
+            li.textContent = `${field.label}: ${value}`;
+            contentsList.appendChild(li);
+        }
+    });
+    
+    // Add timestamp if available
+    if (draft.timestamp) {
+        const li = document.createElement('li');
+        const date = new Date(draft.timestamp);
+        li.textContent = `Saved: ${date.toLocaleString()}`;
+        li.style.fontStyle = 'italic';
+        li.style.color = 'var(--text-secondary)';
+        contentsList.appendChild(li);
+    }
+}
+
+// Recover draft
+function recoverDraft() {
+    const draft = getDraft();
+    if (draft) {
+        // Populate form fields
+        document.getElementById('artistName').value = draft.name || '';
+        document.getElementById('artistImage').value = draft.image || '';
+        document.getElementById('artistURL').value = draft.url || '';
+        document.getElementById('artistGenre').value = draft.genre || '';
+        document.getElementById('artistVibes').value = draft.vibes || '';
+        document.getElementById('artistComment').value = draft.comment || '';
+        document.getElementById('artistPreview').value = draft.preview || '';
+        
+        // Trigger preview updates
+        document.getElementById('artistName').dispatchEvent(new Event('input'));
+        document.getElementById('artistImage').dispatchEvent(new Event('input'));
+        document.getElementById('artistGenre').dispatchEvent(new Event('input'));
+        document.getElementById('artistVibes').dispatchEvent(new Event('input'));
+        document.getElementById('artistComment').dispatchEvent(new Event('input'));
+        
+        showNotification('Draft recovered successfully!');
+    }
+    
+    closeDraftModal();
+}
+
+// Discard draft
+function discardDraft() {
+    try {
+        localStorage.removeItem('artistFormDraft');
+        showNotification('Draft discarded.');
+    } catch (error) {
+        console.warn('Could not discard draft:', error);
+    }
+    
+    updateManualRecoveryButton();
+    closeDraftModal();
+}
+
+// Close draft modal
+function closeDraftModal() {
+    draftState.isDraftModalShowing = false;
+    document.getElementById('draftRecoveryModal').style.display = 'none';
+}
+
+// Manual draft recovery
+function manualDraftRecovery() {
+    const draft = getDraft();
+    if (draft) {
+        showDraftRecoveryModal(draft);
+    }
+}
+
+// Update manual recovery button visibility
+function updateManualRecoveryButton() {
+    const button = document.getElementById('manualDraftRecoveryButton');
+    const draft = getDraft();
+    
+    const hasSubstantialDraft = draft && (
+        (draft.name && draft.name.length >= 2) ||
+        (draft.genre && draft.genre.length >= 2) ||
+        (draft.comment && draft.comment.length >= 10)
+    );
+    
+    if (hasSubstantialDraft && !draftState.isEditing && !draftState.isDraftModalShowing) {
+        button.style.display = 'flex';
+    } else {
+        button.style.display = 'none';
+    }
+}
+
+// Clear draft when form is successfully submitted
+function clearDraftOnSubmit() {
+    try {
+        localStorage.removeItem('artistFormDraft');
+        updateManualRecoveryButton();
+    } catch (error) {
+        console.warn('Could not clear draft:', error);
+    }
+}
+
+// Enhanced toggle form function with draft support
+function toggleFormWithDraft() {
+    const formContainer = document.getElementById('formContainer');
+    const header = document.getElementById('header');
+    const toggleButton = document.getElementById('toggleFormButton');
+    
+    if (formContainer.style.display === 'none' || !formContainer.style.display) {
+        formContainer.style.display = 'block';
+        header.style.display = 'none';
+        toggleButton.innerHTML = '<i class="fas fa-times"></i> Cancel';
+        draftState.isEditing = false;
+        
+        // Reset the preview to default state
+        resetPreview();
+        
+        // Initialize draft functionality
+        initializeDraftFunctionality();
+        
+    } else {
+        formContainer.style.display = 'none';
+        header.style.display = 'block';
+        toggleButton.innerHTML = '<i class="fas fa-plus"></i> Add Artist';
+        
+        // Clear timers
+        clearTimeout(draftState.draftCheckTimer);
+        clearTimeout(draftState.autoSaveTimer);
+    }
+}
+
+// Enhanced edit modal function with draft support
+function openEditModalWithDraft(id) {
+    draftState.isEditing = true;
+    openEditModal(id);
 }
