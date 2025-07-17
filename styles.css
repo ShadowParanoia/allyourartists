@@ -167,6 +167,20 @@ input:focus, textarea:focus {
   outline: none;
 }
 
+/* Form validation styles */
+input.error, textarea.error {
+  border-color: #e53935;
+  background-color: rgba(229, 57, 53, 0.1);
+}
+
+.error-message {
+  display: block;
+  color: #e53935;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
 input::placeholder, textarea::placeholder {
   color: var(--text-secondary);
 }

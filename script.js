@@ -1,8 +1,45 @@
+// Constants for local storage versioning
+const STORAGE_VERSION = '1.0';
+const STORAGE_KEYS = {
+    ARTISTS: 'artists',
+    VERSION: 'storageVersion'
+};
+
 document.addEventListener('DOMContentLoaded', () => {
+    migrateLocalStorageIfNeeded();
     loadArtistsFromLocalStorage();
     document.getElementById('splashModal').style.display = 'block'; // Show splash screen on load
     setupEventListeners();
+    setupSearch(); // Enable search functionality
 });
+
+// Migrate local storage data if needed
+function migrateLocalStorageIfNeeded() {
+    const currentVersion = localStorage.getItem(STORAGE_KEYS.VERSION);
+    
+    if (!currentVersion) {
+        // First time user or legacy data
+        const legacyArtists = localStorage.getItem('artists');
+        if (legacyArtists) {
+            // Legacy data exists, ensure it has the right structure
+            try {
+                const artists = JSON.parse(legacyArtists);
+                // Add dateAdded field to existing artists if missing
+                const migratedArtists = artists.map(artist => ({
+                    ...artist,
+                    dateAdded: artist.dateAdded || artist.id || Date.now()
+                }));
+                localStorage.setItem(STORAGE_KEYS.ARTISTS, JSON.stringify(migratedArtists));
+            } catch (e) {
+                console.warn('Error migrating legacy data:', e);
+            }
+        }
+        localStorage.setItem(STORAGE_KEYS.VERSION, STORAGE_VERSION);
+    }
+    
+    // Future migrations can be added here
+    // if (currentVersion === '1.0' && STORAGE_VERSION === '1.1') { ... }
+}
 
 // Setup all event listeners
 function setupEventListeners() {
@@ -32,17 +69,139 @@ function setupEventListeners() {
     setupPreviewHandlers();
 }
 
+// Form validation functions
+function validateForm() {
+    const artistName = document.getElementById('artistName').value.trim();
+    const artistImage = document.getElementById('artistImage').value.trim();
+    const artistURL = document.getElementById('artistURL').value.trim();
+    const artistGenre = document.getElementById('artistGenre').value.trim();
+    const artistVibes = document.getElementById('artistVibes').value.trim();
+    const artistComment = document.getElementById('artistComment').value.trim();
+    const artistPreview = document.getElementById('artistPreview').value.trim();
+
+    // Clear previous error styles
+    clearValidationErrors();
+
+    let isValid = true;
+    let errors = [];
+
+    // Validate artist name
+    if (!artistName) {
+        showFieldError('artistName', 'Artist name is required');
+        errors.push('Artist name is required');
+        isValid = false;
+    } else if (artistName.length < 2) {
+        showFieldError('artistName', 'Artist name must be at least 2 characters');
+        errors.push('Artist name must be at least 2 characters');
+        isValid = false;
+    }
+
+    // Validate image URL
+    if (!artistImage) {
+        showFieldError('artistImage', 'Image URL is required');
+        errors.push('Image URL is required');
+        isValid = false;
+    } else if (!isValidUrl(artistImage)) {
+        showFieldError('artistImage', 'Please enter a valid image URL');
+        errors.push('Please enter a valid image URL');
+        isValid = false;
+    }
+
+    // Validate artist page URL
+    if (!artistURL) {
+        showFieldError('artistURL', 'Artist page URL is required');
+        errors.push('Artist page URL is required');
+        isValid = false;
+    } else if (!isValidUrl(artistURL)) {
+        showFieldError('artistURL', 'Please enter a valid URL');
+        errors.push('Please enter a valid artist page URL');
+        isValid = false;
+    }
+
+    // Validate genre
+    if (!artistGenre) {
+        showFieldError('artistGenre', 'Genre is required');
+        errors.push('Genre is required');
+        isValid = false;
+    }
+
+    // Validate vibes
+    if (!artistVibes) {
+        showFieldError('artistVibes', 'Vibes are required');
+        errors.push('Vibes are required');
+        isValid = false;
+    }
+
+    // Validate comment
+    if (!artistComment) {
+        showFieldError('artistComment', 'Comment is required');
+        errors.push('Comment is required');
+        isValid = false;
+    } else if (artistComment.length < 10) {
+        showFieldError('artistComment', 'Comment must be at least 10 characters');
+        errors.push('Comment must be at least 10 characters');
+        isValid = false;
+    }
+
+    // Validate Spotify URL
+    if (!artistPreview) {
+        showFieldError('artistPreview', 'Spotify preview URL is required');
+        errors.push('Spotify preview URL is required');
+        isValid = false;
+    } else if (!isValidSpotifyUrl(artistPreview)) {
+        showFieldError('artistPreview', 'Please enter a valid Spotify track URL');
+        errors.push('Please enter a valid Spotify track URL');
+        isValid = false;
+    }
+
+    return { isValid, errors };
+}
+
+function showFieldError(fieldId, message) {
+    const field = document.getElementById(fieldId);
+    const formGroup = field.closest('.form-group');
+    
+    // Add error class to field
+    field.classList.add('error');
+    
+    // Add error message
+    let errorElement = formGroup.querySelector('.error-message');
+    if (!errorElement) {
+        errorElement = document.createElement('span');
+        errorElement.classList.add('error-message');
+        formGroup.appendChild(errorElement);
+    }
+    errorElement.textContent = message;
+}
+
+function clearValidationErrors() {
+    document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+    document.querySelectorAll('.error-message').forEach(el => el.remove());
+}
+
+function isValidSpotifyUrl(url) {
+    if (!url) return false;
+    return /spotify\.com\/track\/|spotify:track:|spotify\.link\//i.test(url);
+}
+
 // Handle add artist form submission
 function handleAddArtist(event) {
     event.preventDefault();
     
-    const artistName = document.getElementById('artistName').value;
-    const artistImage = document.getElementById('artistImage').value;
-    const artistURL = document.getElementById('artistURL').value;
-    const artistGenre = document.getElementById('artistGenre').value;
-    const artistVibes = document.getElementById('artistVibes').value;
-    const artistComment = document.getElementById('artistComment').value;
-    const artistPreview = document.getElementById('artistPreview').value;
+    // Validate form
+    const validation = validateForm();
+    if (!validation.isValid) {
+        showNotification('Please fix the form errors before submitting.');
+        return;
+    }
+    
+    const artistName = document.getElementById('artistName').value.trim();
+    const artistImage = document.getElementById('artistImage').value.trim();
+    const artistURL = document.getElementById('artistURL').value.trim();
+    const artistGenre = document.getElementById('artistGenre').value.trim();
+    const artistVibes = document.getElementById('artistVibes').value.trim();
+    const artistComment = document.getElementById('artistComment').value.trim();
+    const artistPreview = document.getElementById('artistPreview').value.trim();
 
     const artist = {
         id: Date.now(),
@@ -52,7 +211,8 @@ function handleAddArtist(event) {
         genre: artistGenre,
         vibes: artistVibes,
         comment: artistComment,
-        preview: artistPreview
+        preview: artistPreview,
+        dateAdded: Date.now()
     };
 
     addArtistToCollection(artist);
@@ -70,8 +230,9 @@ function handleAddArtist(event) {
     const toggleButton = document.getElementById('toggleFormButton');
     toggleButton.innerHTML = '<i class="fas fa-plus"></i> Add Artist';
     
-    // Reset preview
+    // Reset preview and clear validation errors
     resetPreview();
+    clearValidationErrors();
 }
 
 // Simple notification system
@@ -289,10 +450,36 @@ function addArtistToCollection(artist) {
     document.getElementById('artistCollection').appendChild(artistCard);
 }
 
-// Extract Spotify track ID from URL
+// Extract Spotify track ID from URL - handles multiple URL formats
 function extractSpotifyTrackId(url) {
-    const match = url.match(/track\/([a-zA-Z0-9]+)/);
-    return match ? match[1] : '';
+    if (!url) return '';
+    
+    // Handle different Spotify URL formats:
+    // https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh
+    // https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh?si=...
+    // https://spotify.link/...
+    // spotify:track:4iV5W9uYEdYUVa79Axb7Rh
+    
+    let trackId = '';
+    
+    // Try standard open.spotify.com URLs
+    let match = url.match(/track\/([a-zA-Z0-9]+)/);
+    if (match) {
+        trackId = match[1];
+    }
+    
+    // Try spotify: URI format
+    if (!trackId) {
+        match = url.match(/spotify:track:([a-zA-Z0-9]+)/);
+        if (match) {
+            trackId = match[1];
+        }
+    }
+    
+    // Try to extract from spotify.link shortened URLs (would need API call in real scenario)
+    // For now, just return empty string for unsupported formats
+    
+    return trackId;
 }
 
 // Confirm before deleting artist
@@ -360,27 +547,27 @@ function confirmDelete(id, name) {
 
 // Save artist to localStorage
 function saveArtistToLocalStorage(artist) {
-    let artists = JSON.parse(localStorage.getItem('artists')) || [];
+    let artists = JSON.parse(localStorage.getItem(STORAGE_KEYS.ARTISTS)) || [];
     artists.push(artist);
-    localStorage.setItem('artists', JSON.stringify(artists));
+    localStorage.setItem(STORAGE_KEYS.ARTISTS, JSON.stringify(artists));
 }
 
 // Load artists from localStorage
 function loadArtistsFromLocalStorage() {
-    const artists = JSON.parse(localStorage.getItem('artists')) || [];
+    const artists = JSON.parse(localStorage.getItem(STORAGE_KEYS.ARTISTS)) || [];
     
     // Clear existing collection before loading
     document.getElementById('artistCollection').innerHTML = '';
     
     // Add artists in reverse chronological order (newest first)
-    artists.sort((a, b) => b.id - a.id).forEach(artist => {
+    artists.sort((a, b) => (b.dateAdded || b.id) - (a.dateAdded || a.id)).forEach(artist => {
         addArtistToCollection(artist);
     });
 }
 
 // Open edit modal for artist
 function openEditModal(id) {
-    let artists = JSON.parse(localStorage.getItem('artists')) || [];
+    let artists = JSON.parse(localStorage.getItem(STORAGE_KEYS.ARTISTS)) || [];
     const artist = artists.find(artist => artist.id === id);
 
     if (artist) {
@@ -415,7 +602,7 @@ function saveEditedArtist(event) {
     const artistComment = document.getElementById('editArtistComment').value;
     const artistPreview = document.getElementById('editArtistPreview').value;
 
-    let artists = JSON.parse(localStorage.getItem('artists')) || [];
+    let artists = JSON.parse(localStorage.getItem(STORAGE_KEYS.ARTISTS)) || [];
     const artistIndex = artists.findIndex(artist => artist.id === artistId);
 
     if (artistIndex > -1) {
@@ -427,10 +614,11 @@ function saveEditedArtist(event) {
             genre: artistGenre,
             vibes: artistVibes,
             comment: artistComment,
-            preview: artistPreview
+            preview: artistPreview,
+            dateAdded: artists[artistIndex].dateAdded || artistId // Preserve original date
         };
 
-        localStorage.setItem('artists', JSON.stringify(artists));
+        localStorage.setItem(STORAGE_KEYS.ARTISTS, JSON.stringify(artists));
         
         // Refresh collection display and show notification
         document.getElementById('artistCollection').innerHTML = '';
@@ -442,10 +630,10 @@ function saveEditedArtist(event) {
 
 // Delete artist from collection
 function deleteArtist(id) {
-    let artists = JSON.parse(localStorage.getItem('artists')) || [];
+    let artists = JSON.parse(localStorage.getItem(STORAGE_KEYS.ARTISTS)) || [];
     const artistToDelete = artists.find(artist => artist.id === id);
     artists = artists.filter(artist => artist.id !== id);
-    localStorage.setItem('artists', JSON.stringify(artists));
+    localStorage.setItem(STORAGE_KEYS.ARTISTS, JSON.stringify(artists));
 
     const artistCard = document.querySelector(`.artistCard[data-id='${id}']`);
     if (artistCard) {
