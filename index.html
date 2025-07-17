@@ -12,48 +12,48 @@
     <div class="container">
         <header class="app-header">
             <h1 id="header">AllYourArtists</h1>
-            <button id="toggleFormButton"><i class="fas fa-plus"></i> Add Artist</button>
+            <button id="toggleFormButton" aria-label="Add new artist to collection"><i class="fas fa-plus"></i> Add Artist</button>
         </header>
         
-        <div id="formContainer">
+        <div id="formContainer" role="dialog" aria-labelledby="formHeader" aria-hidden="true">
             <div class="form-header">
-                <h2>Add New Artist</h2>
+                <h2 id="formHeader">Add New Artist</h2>
             </div>
             <div class="form-preview-layout">
                 <div class="form-columns-container">
                     <div class="form-left-column">
-                        <form id="artistForm">
+                        <form id="artistForm" aria-label="Add artist form">
                             <div class="form-group">
                                 <label for="artistName">Artist Name</label>
-                                <input type="text" id="artistName" placeholder="Enter artist name" required>
+                                <input type="text" id="artistName" placeholder="Enter artist name" required aria-describedby="artistName-error">
                             </div>
                             <div class="form-group">
                                 <label for="artistImage">Image URL</label>
-                                <input type="url" id="artistImage" placeholder="Enter image URL" required>
+                                <input type="url" id="artistImage" placeholder="Enter image URL" required aria-describedby="artistImage-error">
                             </div>
                             <div class="form-group">
                                 <label for="artistURL">Artist Page URL</label>
-                                <input type="url" id="artistURL" placeholder="Enter artist page URL" required>
+                                <input type="url" id="artistURL" placeholder="Enter artist page URL" required aria-describedby="artistURL-error">
                             </div>
                             <div class="form-group">
                                 <label for="artistGenre">Genre</label>
-                                <input type="text" id="artistGenre" placeholder="Enter genre" required>
+                                <input type="text" id="artistGenre" placeholder="Enter genre" required aria-describedby="artistGenre-error">
                             </div>
                         </div>
                         <div class="form-right-column">
                             <div class="form-group">
                                 <label for="artistVibes">Vibes</label>
-                                <input type="text" id="artistVibes" placeholder="Enter vibes" required>
+                                <input type="text" id="artistVibes" placeholder="Enter vibes" required aria-describedby="artistVibes-error">
                             </div>
                             <div class="form-group">
                                 <label for="artistComment">Comment</label>
-                                <textarea id="artistComment" placeholder="Enter your comments" required></textarea>
+                                <textarea id="artistComment" placeholder="Enter your comments" required aria-describedby="artistComment-error"></textarea>
                             </div>
                             <div class="form-group">
                                 <label for="artistPreview">Spotify Preview URL</label>
-                                <input type="url" id="artistPreview" placeholder="Enter Spotify URL" required>
+                                <input type="url" id="artistPreview" placeholder="Enter Spotify URL" required aria-describedby="artistPreview-error">
                             </div>
-                            <button type="submit"><i class="fas fa-plus"></i> Add to Collection</button>
+                            <button type="submit" aria-label="Add artist to collection"><i class="fas fa-plus"></i> Add to Collection</button>
                         </div>
                     </form>
                 </div>
@@ -81,7 +81,35 @@
             </div>
         </div>
         
-        <div id="artistCollection"></div>
+        <!-- Filter and Sort Controls -->
+        <div id="controlsContainer" class="controls-container" role="toolbar" aria-label="Filter and sort controls">
+            <div class="filter-section">
+                <label for="genreFilter">Filter by Genre:</label>
+                <select id="genreFilter" aria-label="Filter artists by genre">
+                    <option value="">All Genres</option>
+                </select>
+                
+                <label for="vibesFilter">Filter by Vibes:</label>
+                <select id="vibesFilter" aria-label="Filter artists by vibes">
+                    <option value="">All Vibes</option>
+                </select>
+            </div>
+            
+            <div class="sort-section">
+                <label for="sortOptions">Sort by:</label>
+                <select id="sortOptions" aria-label="Sort artists">
+                    <option value="dateAdded-desc">Newest First</option>
+                    <option value="dateAdded-asc">Oldest First</option>
+                    <option value="name-asc">Name A-Z</option>
+                    <option value="name-desc">Name Z-A</option>
+                    <option value="genre-asc">Genre A-Z</option>
+                </select>
+            </div>
+            
+            <button id="clearFilters" class="clear-filters-btn" aria-label="Clear all filters and reset to default view">Clear Filters</button>
+        </div>
+        
+        <div id="artistCollection" role="main" aria-label="Artist collection" aria-live="polite"></div>
     </div>
     
     <div id="editModal" class="modal">
