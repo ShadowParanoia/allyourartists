@@ -216,6 +216,97 @@ form button[type="submit"]:hover {
   transform: translateY(-2px);
 }
 
+/* Controls Container */
+.controls-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--card-bg);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-md);
+  box-shadow: var(--shadow-light);
+}
+
+.filter-section,
+.sort-section {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-section label,
+.sort-section label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.filter-section select,
+.sort-section select {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius);
+  padding: 8px 12px;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  min-width: 150px;
+  cursor: pointer;
+  transition: background-color var(--transition-speed), border-color var(--transition-speed);
+}
+
+.filter-section select:focus,
+.sort-section select:focus {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+.filter-section select option,
+.sort-section select option {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+}
+
+.clear-filters-btn {
+  background-color: transparent;
+  border: 1px solid var(--text-secondary);
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all var(--transition-speed);
+  font-size: 0.9rem;
+}
+
+.clear-filters-btn:hover {
+  background-color: var(--text-secondary);
+  color: var(--secondary-color);
+}
+
+/* No Results Message */
+.no-results-message {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--spacing-lg);
+  color: var(--text-secondary);
+}
+
+.no-results-message i {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-sm);
+  color: var(--primary-color);
+}
+
+.no-results-message h3 {
+  margin-bottom: var(--spacing-xs);
+  color: var(--text-color);
+}
+
 /* Artist Collection Grid */
 #artistCollection {
   display: grid;
@@ -240,6 +331,13 @@ form button[type="submit"]:hover {
 .artistCard:hover {
   transform: translateY(-8px);
   box-shadow: var(--shadow-heavy);
+}
+
+/* Keyboard focus styles */
+.artistCard.keyboard-focused {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 24px rgba(29, 185, 84, 0.4);
+  border: 2px solid var(--primary-color);
 }
 
 .artistCard img {
@@ -526,8 +624,51 @@ form button[type="submit"]:hover {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes slideInFromBottom {
+  from { 
+    opacity: 0; 
+    transform: translateY(50px) scale(0.9); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
+@keyframes fadeOut {
+  from { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+  to { 
+    opacity: 0; 
+    transform: scale(0.8); 
+  }
+}
+
 .artistCard {
-  animation: fadeIn 0.4s ease-out;
+  animation: slideInFromBottom 0.5s ease-out;
+}
+
+.artistCard.removing {
+  animation: fadeOut 0.3s ease-in;
+}
+
+/* Hover animations */
+.artistCard {
+  transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.artistCard:hover {
+  transform: translateY(-12px) scale(1.02);
+}
+
+.artistCard:hover img {
+  transform: scale(1.05);
+}
+
+.artistCard img {
+  transition: transform var(--transition-speed) ease;
 }
 
 /* Responsive adjustments */
@@ -539,15 +680,35 @@ form button[type="submit"]:hover {
   .form-right-column button[type="submit"] {
     margin-top: var(--spacing-sm);
   }
+  
+  .controls-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+  
+  .filter-section,
+  .sort-section {
+    justify-content: space-between;
+  }
+  
+  .filter-section select,
+  .sort-section select {
+    min-width: 120px;
+  }
 }
 
 @media (max-width: 768px) {
+  body {
+    padding: var(--spacing-sm);
+  }
+  
   .container {
     padding: var(--spacing-sm);
   }
   
   #artistCollection {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: var(--spacing-sm);
   }
   
@@ -564,11 +725,36 @@ form button[type="submit"]:hover {
   
   .form-preview-layout {
     grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
   }
   
   #artistPreviewCard {
     order: -1;
     margin-bottom: var(--spacing-md);
+  }
+  
+  .controls-container {
+    padding: var(--spacing-sm);
+  }
+  
+  .filter-section,
+  .sort-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-xs);
+  }
+  
+  .filter-section select,
+  .sort-section select {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  /* Improve touch targets on mobile */
+  .artistCard .actions button {
+    width: 44px;
+    height: 44px;
+    font-size: 1.4rem;
   }
 }
 
@@ -578,14 +764,34 @@ form button[type="submit"]:hover {
   }
   
   h1 {
-    font-size: 1.8rem;
+    font-size: 2rem;
   }
   
   .artistCard {
-    min-height: 400px;
+    min-height: 380px;
   }
   
   #toggleFormButton {
     width: 100%;
+    padding: 16px 24px;
+  }
+  
+  .search-input {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  /* Stack filter controls vertically */
+  .controls-container {
+    display: block;
+  }
+  
+  .filter-section,
+  .sort-section {
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .clear-filters-btn {
+    width: 100%;
+    padding: 12px;
   }
 }
